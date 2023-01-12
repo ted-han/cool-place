@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import Image from "next/image";
 import styles from "styles/Home.module.css";
 
@@ -16,13 +16,13 @@ export async function getStaticProps() {
     },
   );
   const place = await placeRes.json();
-  const places = place.results.map((v) => {
+  const places = place.results.map((v: any) => {
     const name = v.properties?.["이름"]?.title[0]?.plain_text;
     const address = v.properties?.["주소"]?.rich_text[0]?.plain_text;
     const comment = v.properties?.["한줄평"]?.rich_text[0]?.plain_text;
     const type = v.properties?.["분류"]?.select?.name === "커피" ? 2 : 1;
     const imgUrl = v.properties?.["사진"]?.files[0]?.file?.url || "";
-    const tags = v.properties?.["태그"]?.multi_select?.map((t) => t.name);
+    const tags = v.properties?.["태그"]?.multi_select?.map((t: any) => t.name);
     return {
       name,
       address,
@@ -56,8 +56,8 @@ export async function getStaticProps() {
       const { lat, lng } = geoInfo[v.name];
       newPlaces.push({
         ...v,
-        lat,
-        lng,
+        lat: Number(lat),
+        lng: Number(lng),
       });
     } else {
       const resGeo = await fetch(
@@ -75,8 +75,8 @@ export async function getStaticProps() {
       const lng = geocode.addresses[0].x;
       newPlaces.push({
         ...v,
-        lat,
-        lng,
+        lat: Number(lat),
+        lng: Number(lng),
       });
     }
   }
@@ -87,38 +87,79 @@ export async function getStaticProps() {
     },
   };
 }
+interface Place {
+  name: string;
+  address: string;
+  tags: string[];
+  comment: string;
+  type: number;
+  imgUrl: string;
+  lat: number;
+  lng: number;
+}
+interface Data {
+  data: Place[];
+}
+interface MyLocation {
+  lat: number;
+  lng: number;
+}
 
-export default function Map({ data }) {
-  const mapRef = useRef();
-  const markerRef = useRef([]);
-  const bottomSheetRef = useRef();
-  const [index, setIndex] = useState(null);
+export default function Map({ data }: Data) {
+  const mapRef = useRef<naver.maps.Map>();
+  const markerRef = useRef<{ type: number; marker: any }[]>([]);
+  const bottomSheetRef = useRef<HTMLDivElement>(null);
+  const [index, setIndex] = useState<number | null>(null);
   const [categoryIndex, setCategoryIndex] = useState(0);
-  const [myLocation, setMyLocation] = useState(null);
+  const [myLocation, setMyLocation] = useState<MyLocation | null>(null);
 
   useEffect(() => {
-    setMyLocation({
-      lat: "37.491233",
-      lng: "127.010081",
-    });
-
-    // 테스트할때만 주석
-    // if (navigator.geolocation) {
-    //   console.log("geolocation");
-    //   navigator.geolocation.getCurrentPosition((position) => {
-    //     console.log(position);
-    //     setMyLocation({
-    //       lat: position.coords.latitude,
-    //       lng: position.coords.longitude,
-    //     });
-    //   });
-    // } else {
-    //   setMyLocation({
-    //     lat: 37.3595704,
-    //     lng: 127.105399,
-    //   });
-    // }
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition((position) => {
+        setMyLocation({
+          lat: position.coords.latitude,
+          lng: position.coords.longitude,
+        });
+      });
+    } else {
+      setMyLocation({
+        lat: 37.3595704,
+        lng: 127.105399,
+      });
+    }
   }, []);
+
+  const addMarker = useCallback(
+    (type: number) => {
+      data.map((v: Place, i: number) => {
+        if (type !== 0 && type !== v.type) return;
+        const location = new naver.maps.LatLng(v.lat, v.lng);
+        const marker = new naver.maps.Marker({
+          position: location,
+          map: mapRef.current,
+        });
+        markerRef.current.push({
+          type: v.type,
+          marker: marker,
+        });
+        naver.maps.Event.addListener(marker, "click", function (e) {
+          // todo: 넣을지말지 고민
+          // mapRef.current.panTo(location, {
+          //   duration: 300,
+          // });
+          setIndex((prev) => {
+            if (prev === i) {
+              onClick(false);
+              return null;
+            }
+            onClick(true);
+            return i;
+          });
+        });
+      });
+    },
+    [data],
+  );
 
   useEffect(() => {
     if (!myLocation) return;
@@ -139,40 +180,9 @@ export default function Map({ data }) {
     });
 
     addMarker(0);
-  }, [data, myLocation]);
+  }, [data, myLocation, addMarker]);
 
-  const addMarker = (type: number) => {
-    data.map((v, i) => {
-      if (type !== 0 && type !== v.type) return;
-      const location = new naver.maps.LatLng(v.lat, v.lng);
-      const marker = new naver.maps.Marker({
-        position: location,
-        map: mapRef.current,
-      });
-      markerRef.current.push({
-        type: v.type,
-        lat: v.lat,
-        lng: v.lng,
-        marker: marker,
-      });
-      naver.maps.Event.addListener(marker, "click", function (e) {
-        // todo: 넣을지말지 고민
-        // mapRef.current.panTo(location, {
-        //   duration: 300,
-        // });
-        setIndex((prev) => {
-          if (prev === i) {
-            onClick(false);
-            return null;
-          }
-          onClick(true);
-          return i;
-        });
-      });
-    });
-  };
-
-  const onClickCategory = (i) => {
+  const onClickCategory = (i: number) => {
     if (categoryIndex === i) return;
     if (categoryIndex === 0) {
       const type = i === 1 ? 2 : 1;
@@ -197,7 +207,7 @@ export default function Map({ data }) {
     setCategoryIndex(i);
   };
 
-  const onClick = (isVisible) => {
+  const onClick = (isVisible: boolean) => {
     if (isVisible) {
       bottomSheetRef.current?.style.setProperty(
         "transform",
@@ -225,17 +235,21 @@ export default function Map({ data }) {
         ))}
       </div>
       <div className={styles.bottomSheet} ref={bottomSheetRef}>
-        <h3>{data[index]?.name}</h3>
-        <div>
-          <span>{data[index]?.comment}</span>
-        </div>
-        <div>
-          {data[index]?.tags?.map((t) => (
-            <span key={t}>{t}</span>
-          ))}
-        </div>
-        {data[index]?.imgUrl && (
-          <Image src={data[index]?.imgUrl} alt="" width={50} height={50} />
+        {index !== null && (
+          <>
+            <h3>{data[index]?.name}</h3>
+            <div>
+              <span>{data[index]?.comment}</span>
+            </div>
+            <div>
+              {data[index]?.tags?.map((t) => (
+                <span key={t}>{t}</span>
+              ))}
+            </div>
+            {data[index]?.imgUrl && (
+              <Image src={data[index]?.imgUrl} alt="" width={50} height={50} />
+            )}
+          </>
         )}
       </div>
     </>
