@@ -29,7 +29,7 @@
 .bottomSheet {
   width: 100%;
   height: 200px;
-  background: rgb(199, 199, 199);
+  background: gold;
   position: absolute;
   bottom: -200px;
   transition: transform 250ms ease-out;
