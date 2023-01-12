@@ -214,8 +214,12 @@ export default function Map({ data }: Data) {
         "transform",
         "translateY(-200px)",
       );
+      bottomSheetRef.current?.style.setProperty("height", "200px");
+      bottomSheetRef.current?.style.setProperty("padding", "20px");
     } else {
       bottomSheetRef.current?.style.setProperty("transform", "translateY(0)");
+      bottomSheetRef.current?.style.setProperty("height", "0px");
+      bottomSheetRef.current?.style.setProperty("padding", "0");
     }
   };
 

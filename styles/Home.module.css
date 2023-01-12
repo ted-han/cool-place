@@ -28,12 +28,12 @@
 
 .bottomSheet {
   width: 100%;
-  height: 200px;
+  height: 0;
   background: gold;
   position: absolute;
   bottom: -200px;
-  transition: transform 250ms ease-out;
-  padding: 20px;
+  transition: all 250ms ease-out;
+  padding: 0;
   border-top-left-radius: 8px;
   border-top-right-radius: 8px;
 }
