@@ -114,19 +114,20 @@ export default function Map({ data }: Data) {
   const [myLocation, setMyLocation] = useState<MyLocation | null>(null);
 
   useEffect(() => {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition((position) => {
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
         setMyLocation({
           lat: position.coords.latitude,
           lng: position.coords.longitude,
         });
-      });
-    } else {
-      setMyLocation({
-        lat: 37.3595704,
-        lng: 127.105399,
-      });
-    }
+      },
+      (error) => {
+        setMyLocation({
+          lat: 37.4695704,
+          lng: 127.065399,
+        });
+      },
+    );
   }, []);
 
   const addMarker = useCallback(
