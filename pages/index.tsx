@@ -170,14 +170,13 @@ export default function Map({ data }: Data) {
       zoomControl: true,
       zoomControlOptions: {
         position: naver.maps.Position.TOP_RIGHT,
+        style: naver.maps.ZoomControlStyle.SMALL,
       },
     });
 
     naver.maps.Event.addListener(mapRef.current, "click", function (e) {
       onClick(false);
-      setTimeout(() => {
-        setIndex(null);
-      }, 100);
+      setIndex(null);
     });
 
     addMarker(0);
@@ -212,9 +211,9 @@ export default function Map({ data }: Data) {
     if (isVisible) {
       bottomSheetRef.current?.style.setProperty(
         "transform",
-        "translateY(-200px)",
+        "translateY(-280px)",
       );
-      bottomSheetRef.current?.style.setProperty("height", "200px");
+      bottomSheetRef.current?.style.setProperty("height", "280px");
       bottomSheetRef.current?.style.setProperty("padding", "20px");
     } else {
       bottomSheetRef.current?.style.setProperty("transform", "translateY(0)");
