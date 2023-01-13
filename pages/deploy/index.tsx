@@ -19,7 +19,7 @@ export default function Deploy({ password }: { password: string }) {
       window.alert("Wrong password");
       return;
     }
-    const result = await fetch(`/api/deploy`, {
+    const result = await fetch(`/api`, {
       method: "GET",
     });
     if (result.status === 200) {

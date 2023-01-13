@@ -61,7 +61,7 @@ export async function getStaticProps() {
       });
     } else {
       const resGeo = await fetch(
-        `https://naveropenapi.apigw.ntruss.com/map-geocode/v2/geocode?query=서울 서초구 서초대로46길 20-7 1층`,
+        `https://naveropenapi.apigw.ntruss.com/map-geocode/v2/geocode?query=${v.address}`,
         {
           method: "GET",
           headers: {
