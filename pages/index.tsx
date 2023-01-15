@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import Image from "next/image";
 import styles from "styles/Home.module.css";
+import icon_share from "../public/share.png";
 
 export async function getStaticProps() {
   // 노션 DB에서 데이터 가져오기
@@ -211,9 +212,9 @@ export default function Map({ data }: Data) {
     if (isVisible) {
       bottomSheetRef.current?.style.setProperty(
         "transform",
-        "translateY(-280px)",
+        "translateY(-250px)",
       );
-      bottomSheetRef.current?.style.setProperty("height", "280px");
+      bottomSheetRef.current?.style.setProperty("height", "250px");
       bottomSheetRef.current?.style.setProperty("padding", "20px");
     } else {
       bottomSheetRef.current?.style.setProperty("transform", "translateY(0)");
@@ -225,6 +226,10 @@ export default function Map({ data }: Data) {
   return (
     <>
       <div className={styles.mapWrapper}>
+        <header className={styles.header}>
+          <h1>힙힙</h1>
+          <Image src={icon_share} alt="" width={24} height={24} />
+        </header>
         <div id="map" className={styles.map}></div>
       </div>
       <div className={styles.cetegory}>
