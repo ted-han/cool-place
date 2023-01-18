@@ -24,6 +24,7 @@ export async function getStaticProps() {
     const type = v.properties?.["분류"]?.select?.name === "커피" ? 2 : 1;
     const imgUrl = v.properties?.["사진"]?.files[0]?.file?.url || "";
     const tags = v.properties?.["태그"]?.multi_select?.map((t: any) => t.name);
+    const writer = v.properties?.["글쓴이"]?.people[0]?.name;
     return {
       name,
       address,
@@ -31,6 +32,7 @@ export async function getStaticProps() {
       comment,
       type,
       imgUrl,
+      writer,
     };
   });
 
@@ -95,6 +97,7 @@ interface Place {
   comment: string;
   type: number;
   imgUrl: string;
+  writer: string;
   lat: number;
   lng: number;
 }
@@ -139,16 +142,27 @@ export default function Map({ data }: Data) {
         const marker = new naver.maps.Marker({
           position: location,
           map: mapRef.current,
+          title: v.name,
+          icon: {
+            content:
+              '<div class="marker-box">' +
+              `<span>${v.name}</span>` +
+              `<img src="${
+                v.type === 1 ? "/restaurant.png" : "/cafe.png"
+              }" alt="" />` +
+              "</div>",
+            size: new naver.maps.Size(18, 18),
+            anchor: new naver.maps.Point(44, 35),
+          },
         });
         markerRef.current.push({
           type: v.type,
           marker: marker,
         });
         naver.maps.Event.addListener(marker, "click", function (e) {
-          // todo: 넣을지말지 고민
-          // mapRef.current.panTo(location, {
-          //   duration: 300,
-          // });
+          mapRef.current?.panTo(location, {
+            duration: 300,
+          });
           setIndex((prev) => {
             if (prev === i) {
               onClick(false);
@@ -231,35 +245,43 @@ export default function Map({ data }: Data) {
           <Image src={icon_share} alt="" width={24} height={24} />
         </header>
         <div id="map" className={styles.map}></div>
-      </div>
-      <div className={styles.cetegory}>
-        {["전체", "음식점", "카페"].map((c, i) => (
-          <div
-            key={c}
-            className={`${styles.type} ${categoryIndex === i ? styles.on : ""}`}
-            onClick={() => onClickCategory(i)}
-          >
-            <span>{c}</span>
-          </div>
-        ))}
-      </div>
-      <div className={styles.bottomSheet} ref={bottomSheetRef}>
-        {index !== null && (
-          <>
-            <h3>{data[index]?.name}</h3>
-            <div>
-              <span>{data[index]?.comment}</span>
+        <div className={styles.cetegory}>
+          {["전체", "음식점", "카페"].map((c, i) => (
+            <div
+              key={c}
+              className={`${styles.type} ${
+                categoryIndex === i ? styles.on : ""
+              }`}
+              onClick={() => onClickCategory(i)}
+            >
+              <span>{c}</span>
             </div>
-            <div>
-              {data[index]?.tags?.map((t) => (
-                <span key={t}>{t}</span>
-              ))}
-            </div>
-            {data[index]?.imgUrl && (
-              <Image src={data[index]?.imgUrl} alt="" width={50} height={50} />
-            )}
-          </>
-        )}
+          ))}
+        </div>
+        <div className={styles.bottomSheet} ref={bottomSheetRef}>
+          {index !== null && (
+            <>
+              <h3>{data[index]?.name}</h3>
+              <div>
+                <span>&quot;{data[index]?.comment}&quot;</span>
+                <span> -{data[index]?.writer}</span>
+              </div>
+              <div>
+                {data[index]?.tags?.map((t) => (
+                  <span key={t}>{t}</span>
+                ))}
+              </div>
+              {data[index]?.imgUrl && (
+                <Image
+                  src={data[index]?.imgUrl}
+                  alt=""
+                  width={50}
+                  height={50}
+                />
+              )}
+            </>
+          )}
+        </div>
       </div>
     </>
   );
