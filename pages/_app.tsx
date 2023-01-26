@@ -11,6 +11,9 @@ export default function App({ Component, pageProps }: AppProps) {
         <meta charSet="utf-8" />
         <meta name="viewport" content="initial-scale=1.0, width=device-width" />
         <meta property="og:title" content="맛집쓰" key="힙힙" />
+        <meta name="theme-color" content="#000000" />
+        <link rel="apple-touch-icon" href="/icon-192x192.png" />
+        <link rel="manifest" href="/manifest.json" />
       </Head>
       <Component {...pageProps} />
     </>
