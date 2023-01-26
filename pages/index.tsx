@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from "react";
+import Link from "next/link";
 import Image from "next/image";
 import styles from "styles/Home.module.css";
 import icon_share from "../public/share.png";
@@ -56,11 +57,13 @@ export async function getStaticProps() {
   for (let v of places) {
     if (!v.name) continue;
     if (geoInfo[v.name]) {
-      const { lat, lng } = geoInfo[v.name];
+      const { lat, lng, naverId, kakaoId } = geoInfo[v.name];
       newPlaces.push({
         ...v,
         lat: Number(lat),
         lng: Number(lng),
+        naverId: Number(naverId),
+        kakaoId: Number(kakaoId),
       });
     } else {
       const resGeo = await fetch(
@@ -80,6 +83,8 @@ export async function getStaticProps() {
         ...v,
         lat: Number(lat),
         lng: Number(lng),
+        naverId: 0,
+        kakaoId: 0,
       });
     }
   }
@@ -100,6 +105,8 @@ interface Place {
   writer: string;
   lat: number;
   lng: number;
+  naverId: number;
+  kakaoId: number;
 }
 interface Data {
   data: Place[];
@@ -275,10 +282,35 @@ export default function Map({ data }: Data) {
                 <Image
                   src={data[index]?.imgUrl}
                   alt=""
-                  width={50}
-                  height={50}
+                  width={100}
+                  height={100}
                 />
               )}
+              <div>
+                <Link
+                  href={
+                    data[index]?.naverId
+                      ? `nmap://place?id=${data[index]?.naverId}`
+                      : `nmap://search?query=${data[index]?.name}`
+                  }
+                  legacyBehavior
+                >
+                  <a target="_blank">네이버맵</a>
+                </Link>
+              </div>
+              <br />
+              <div>
+                <Link
+                  href={
+                    data[index]?.kakaoId
+                      ? `kakaomap://place?id=${data[index]?.kakaoId}`
+                      : `kakaomap://search?q=${data[index]?.name}&p=${data[index]?.lat},${data[index]?.lng}`
+                  }
+                  legacyBehavior
+                >
+                  <a target="_blank">카카오맵</a>
+                </Link>
+              </div>
             </>
           )}
         </div>
